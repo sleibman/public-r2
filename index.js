@@ -1,12 +1,18 @@
-addEventListener('fetch', event => {
+addEventListener('fetch', (event) => {
   event.respondWith(handleRequest(event.request))
 })
-/**
- * Respond with hello worker text
- * @param {Request} request
- */
+
 async function handleRequest(request) {
-  return new Response('Hello worker!', {
+  const url = new URL(request.url)
+  const key = url.pathname.slice(1)
+
+  const object = await MY_BUCKET.get(key)
+
+  if (!object) {
+    return new Response('Object Not Found', { status: 404 })
+  }
+
+  return new Response(object.body, {
     headers: { 'content-type': 'text/plain' },
   })
 }
